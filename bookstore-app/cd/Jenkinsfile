@@ -1,0 +1,25 @@
+pipeline {
+  agent any
+  environment {
+    WORKER_IP = 'REPLACE_WITH_WORKER_IP'
+  }
+  parameters {
+    string(name: 'IMAGE_TAG', description: 'Docker image tag to deploy')
+  }
+  stages {
+    stage('Deploy to k8s') {
+      steps {
+        sh '''
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/bookstore_poc ubuntu@${WORKER_IP} "export KUBECONFIG=/home/ubuntu/kubeconfig && kubectl set image deployment/bookstore bookstore=${IMAGE_TAG} --record"
+        '''
+      }
+    }
+    stage('Verify Deployment') {
+      steps {
+        sh '''
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/bookstore_poc ubuntu@${WORKER_IP} "export KUBECONFIG=/home/ubuntu/kubeconfig && kubectl rollout status deployment/bookstore"
+        '''
+      }
+    }
+  }
+}

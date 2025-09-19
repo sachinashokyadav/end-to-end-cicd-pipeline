@@ -1,0 +1,73 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: apt update
+      apt:
+        update_cache: yes
+
+- hosts: jenkins
+  become: yes
+  tasks:
+    - name: install docker
+      apt:
+        name: docker.io
+        state: present
+    - name: add ubuntu to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+    - name: install openjdk
+      apt:
+        name: openjdk-17-jre-headless
+        state: present
+    - name: install git
+      apt:
+        name: git
+        state: present
+    - name: add jenkins repository key
+      apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+        state: present
+    - name: add jenkins repository
+      apt_repository:
+        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        state: present
+    - name: update apt cache
+      apt:
+        update_cache: yes
+    - name: install jenkins
+      apt:
+        name: jenkins
+        state: present
+    - name: start jenkins
+      systemd:
+        name: jenkins
+        enabled: yes
+        state: started
+
+- hosts: worker
+  become: yes
+  tasks:
+    - name: install docker
+      apt:
+        name: docker.io
+        state: present
+    - name: install curl
+      apt:
+        name: curl
+        state: present
+    - name: install k3s single node
+      shell: |
+        curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.27.6+k3s1 sh -
+      args:
+        creates: /usr/local/bin/k3s
+    - name: fetch kubeconfig
+      shell: cat /etc/rancher/k3s/k3s.yaml
+      register: kubeconf
+    - name: write kubeconfig
+      copy:
+        content: "{{ kubeconf.stdout }}"
+        dest: /home/ubuntu/kubeconfig
+        owner: ubuntu
+        mode: '0600'

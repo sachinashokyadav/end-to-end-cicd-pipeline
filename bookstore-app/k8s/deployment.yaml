@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookstore
+  labels: { app: bookstore }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: bookstore } }
+  template:
+    metadata: { labels: { app: bookstore } }
+    spec:
+      containers:
+      - name: bookstore
+        image: YOUR_DOCKERHUB_USER/bookstore-app:local
+        ports: [{ containerPort: 3000 }]
+        readinessProbe:
+          httpGet: { path: /health, port: 3000 }
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet: { path: /health, port: 3000 }
+          initialDelaySeconds: 15
+          periodSeconds: 20

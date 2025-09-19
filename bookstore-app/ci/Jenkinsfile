@@ -1,0 +1,68 @@
+pipeline {
+  agent any
+  environment {
+    DOCKERHUB = 'YOUR_DOCKERHUB_USER/bookstore-app'
+    WORKER_IP = 'REPLACE_WITH_WORKER_IP'
+  }
+  stages {
+    stage('Checkout') { steps { checkout scm } }
+    stage('Build & Test') { steps { sh 'cd app && npm install && npm test' } }
+    stage('Security Scan') {
+      parallel {
+        stage('Dependency Check') {
+          steps {
+            sh 'cd app && npm audit --audit-level=high'
+          }
+        }
+        stage('Code Security') {
+          steps {
+            sh '''
+              cd app
+              npx semgrep --config=auto src/ || true
+              find . -name "*.js" -exec grep -l "password\|secret\|key" {} \; | head -5
+            '''
+          }
+        }
+      }
+    }
+    stage('Docker Build & Push') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+          sh '''
+            cd app
+            TAG=$(git rev-parse --short HEAD)
+            docker build -t $DOCKERHUB:$TAG .
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+            docker push $DOCKERHUB:$TAG
+            echo $DOCKERHUB:$TAG > ../image.info
+          '''
+        }
+      }
+    }
+
+  }
+    stage('Container Security') {
+      steps {
+        sh '''
+          cd app
+          TAG=$(git rev-parse --short HEAD)
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy image --exit-code 1 --severity HIGH,CRITICAL $DOCKERHUB:$TAG || true
+        '''
+      }
+    }
+  }
+  post { 
+    always { 
+      archiveArtifacts artifacts: 'app/test-results/**', allowEmptyArchive: true 
+      publishHTML([
+        allowMissing: false,
+        alwaysLinkToLastBuild: true,
+        keepAll: true,
+        reportDir: 'app',
+        reportFiles: 'security-report.html',
+        reportName: 'Security Report'
+      ])
+    }
+  }
+}

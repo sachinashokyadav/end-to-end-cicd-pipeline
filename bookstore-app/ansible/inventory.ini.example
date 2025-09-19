@@ -1,0 +1,6 @@
+[jenkins]
+# replace with actual public ip from terraform output
+13.201.0.121 ansible_user=ubuntu ansible_ssh_private_key_file=~/Downloads/ci-cd-end-to-end.pem
+
+[worker]
+3.108.66.26 ansible_user=ubuntu ansible_ssh_private_key_file=~/Downloads/ci-cd-end-to-end.pem
