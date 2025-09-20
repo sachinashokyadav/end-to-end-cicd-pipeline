@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Deploy to k8s') {
             steps {
-                sshagent(['worker-ssh-key']) { // Use the ID of your SSH credential
+                sshagent(['ssh-key']) { // Use the ID of your SSH credential
                     sh """
                         ssh -o StrictHostKeyChecking=no ubuntu@${WORKER_IP} \\
                         "export KUBECONFIG=/home/ubuntu/kubeconfig && kubectl set image deployment/bookstore bookstore=${IMAGE_TAG} --record"
