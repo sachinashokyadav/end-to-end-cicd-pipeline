@@ -1,8 +1,8 @@
 pipeline {
   agent any
   environment {
-    DOCKERHUB = 'YOUR_DOCKERHUB_USER/bookstore-app'
-    WORKER_IP = 'REPLACE_WITH_WORKER_IP'
+    DOCKERHUB = 'devopsdecode/bookstore-app'
+    WORKER_IP = '13.232.28.45'
   }
   stages {
     stage('Checkout') { steps { checkout scm } }
