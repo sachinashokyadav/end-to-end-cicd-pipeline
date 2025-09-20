@@ -9,17 +9,57 @@ pipeline {
     stages {
         stage('Deploy to k8s') {
             steps {
-                sshagent(['ssh-key']) { // Use the ID of your SSH credential
+                sshagent(['ssh-key']) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ubuntu@${WORKER_IP} \\
-                        "export KUBECONFIG=/home/ubuntu/kubeconfig && kubectl set image deployment/bookstore bookstore=${IMAGE_TAG} --record"
+                        "export KUBECONFIG=/home/ubuntu/kubeconfig && \\
+                        kubectl apply -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookstore
+  labels: { app: bookstore }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: bookstore } }
+  template:
+    metadata: { labels: { app: bookstore } }
+    spec:
+      containers:
+      - name: bookstore
+        image: sachinashokyadav/bookstore-app:${IMAGE_TAG}
+        ports: [{ containerPort: 3000 }]
+        readinessProbe:
+          httpGet: { path: /health, port: 3000 }
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet: { path: /health, port: 3000 }
+          initialDelaySeconds: 15
+          periodSeconds: 20
+EOF
+
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookstore
+spec:
+  type: NodePort
+  selector: { app: bookstore }
+  ports:
+    - port: 3000
+      targetPort: 3000
+      nodePort: 30080
+EOF
+                        "
                     """
                 }
             }
         }
         stage('Verify Deployment') {
             steps {
-                sshagent(['worker-ssh-key']) {
+                sshagent(['ssh-key']) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ubuntu@${WORKER_IP} \\
                         "export KUBECONFIG=/home/ubuntu/kubeconfig && kubectl rollout status deployment/bookstore"
