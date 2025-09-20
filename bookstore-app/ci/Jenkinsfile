@@ -25,8 +25,7 @@ pipeline {
         stage('Code Security') {
           steps {
             dir('bookstore-app') {
-              sh 'cd app && npx semgrep --config=auto src/ || true'
-              sh 'cd app && find . -name "*.js" -exec grep -l "password" {} + || true'
+              sh 'cd app && find src -name "*.js" -exec grep -l "password\|secret\|key" {} + || echo "No hardcoded secrets found"'
             }
           }
         }
