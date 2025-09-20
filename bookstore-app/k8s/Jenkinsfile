@@ -1,0 +1,49 @@
+pipeline {
+  agent any
+  environment {
+    WORKER_IP = '13.232.28.45'
+    DOCKERHUB_IMAGE = 'devopsdecode/bookstore-app:latest'
+  }
+  stages {
+    stage('Checkout') { 
+      steps { 
+        checkout scm 
+      } 
+    }
+    stage('Update Deployment') {
+      steps {
+        dir('bookstore-app') {
+          sh '''
+            sed -i "s|devopsdecode/bookstore-app:local|${DOCKERHUB_IMAGE}|g" k8s/deployment.yaml
+          '''
+        }
+      }
+    }
+    stage('Deploy to K8s') {
+      steps {
+        dir('bookstore-app') {
+          sh '''
+            scp -o StrictHostKeyChecking=no -i ~/.ssh/ci-cd-end-to-end.pem k8s/deployment.yaml ubuntu@${WORKER_IP}:/home/ubuntu/
+            scp -o StrictHostKeyChecking=no -i ~/.ssh/ci-cd-end-to-end.pem k8s/service.yaml ubuntu@${WORKER_IP}:/home/ubuntu/
+            ssh -o StrictHostKeyChecking=no -i ~/.ssh/ci-cd-end-to-end.pem ubuntu@${WORKER_IP} "export KUBECONFIG=/home/ubuntu/kubeconfig && kubectl apply -f deployment.yaml && kubectl apply -f service.yaml"
+          '''
+        }
+      }
+    }
+    stage('Verify Deployment') {
+      steps {
+        sh '''
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ci-cd-end-to-end.pem ubuntu@${WORKER_IP} "export KUBECONFIG=/home/ubuntu/kubeconfig && kubectl rollout status deployment/bookstore && kubectl get pods,svc -l app=bookstore"
+        '''
+      }
+    }
+  }
+  post {
+    success {
+      echo 'Deployment successful! App available at http://${WORKER_IP}:30080'
+    }
+    failure {
+      echo 'Deployment failed - check logs for details'
+    }
+  }
+}
