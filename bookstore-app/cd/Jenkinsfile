@@ -1,7 +1,7 @@
 pipeline {
   agent any
   environment {
-    WORKER_IP = 'REPLACE_WITH_WORKER_IP'
+    WORKER_IP = '13.232.28.45'
   }
   parameters {
     string(name: 'IMAGE_TAG', description: 'Docker image tag to deploy')
