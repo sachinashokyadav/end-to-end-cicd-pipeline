@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
       - name: bookstore
-        image: YOUR_DOCKERHUB_USER/bookstore-app:local
+        image: devopsdecode/bookstore-app:7cced57
         ports: [{ containerPort: 3000 }]
         readinessProbe:
           httpGet: { path: /health, port: 3000 }
