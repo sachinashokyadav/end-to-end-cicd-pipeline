@@ -67,7 +67,7 @@ spec:
 EOF
 
                         # Force rollout to ensure pods use new image
-                        kubectl set image deployment/bookstore bookstore=sachinashokyadav/bookstore-app:${IMAGE_TAG} --record
+                        kubectl set image deployment/bookstore bookstore=sachinashokyadav/bookstore-app:${IMAGE_TAG}
                         "
                     """
                 }
