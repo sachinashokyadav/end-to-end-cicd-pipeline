@@ -12,4 +12,4 @@ const animals = [
   { id: 3, name: 'Giraffe', species: 'Mammal', habitat: 'Savannah', description: 'Tallest land animal', image: 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Giraffe_standing.jpg' },
   { id: 4, name: 'Penguin', species: 'Bird', habitat: 'Antarctica', description: 'Flightless bird adapted to cold', image: 'https://upload.wikimedia.org/wikipedia/commons/e/e1/Adelie_Penguin_chick.JPG' },
   { id: 5, name: 'Dolphin', species: 'Mammal', habitat: 'Ocean', description: 'Intelligent marine mammal', image: 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Dolphin_in_Hawaii.jpg' },
-  { id: 6, name: 'Panda', species: 'Mammal', habitat: 'Forest', description: 'Black and white bear from China', image: 'https://upload.wikimedia.org/wikipedia/commons/0/0f/Gro
+  { id: 6, name: 'Panda', species: 'Mammal', habitat: 'Forest', description: 'Black and white bear from China', image: 'https://upload.wikimedia.org/wikipedia/commons/0/0f/Grosser_Panda.JPG' }
