@@ -1,8 +1,5 @@
 pipeline {
   agent any
-  tools {
-    nodejs 'NodeJS'
-  }
   environment {
     DOCKERHUB = 'YOUR_DOCKERHUB_USER/bookstore-app'
     WORKER_IP = 'REPLACE_WITH_WORKER_IP'
