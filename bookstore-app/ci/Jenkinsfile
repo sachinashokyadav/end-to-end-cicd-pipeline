@@ -54,8 +54,10 @@ pipeline {
         dir('bookstore-app') {
           sh '''
             cd app
+            mkdir -p security-reports
             TAG=$(git rev-parse --short HEAD)
-            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --exit-code 1 --severity HIGH,CRITICAL $DOCKERHUB:$TAG || true
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/security-reports:/reports aquasec/trivy image --format json --output /reports/trivy-report.json $DOCKERHUB:$TAG || true
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/security-reports:/reports aquasec/trivy image --format table --output /reports/trivy-report.txt $DOCKERHUB:$TAG || true
           '''
         }
       }
@@ -63,15 +65,14 @@ pipeline {
   }
   post { 
     always { 
-      archiveArtifacts artifacts: 'bookstore-app/app/test-results/**', allowEmptyArchive: true 
-      publishHTML([
-        allowMissing: false,
-        alwaysLinkToLastBuild: true,
-        keepAll: true,
-        reportDir: 'bookstore-app/app',
-        reportFiles: 'security-report.html',
-        reportName: 'Security Report'
-      ])
+      echo 'Pipeline completed'
+      archiveArtifacts artifacts: 'bookstore-app/app/security-reports/**', allowEmptyArchive: true
+    }
+    success {
+      echo 'Build successful - Docker image pushed'
+    }
+    failure {
+      echo 'Build failed - check logs for details'
     }
   }
 }
