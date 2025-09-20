@@ -10,14 +10,14 @@ pipeline {
     stage('Deploy to k8s') {
       steps {
         sh '''
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/bookstore_poc ubuntu@${WORKER_IP} "export KUBECONFIG=/home/ubuntu/kubeconfig && kubectl set image deployment/bookstore bookstore=${IMAGE_TAG} --record"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ci-cd-end-to-end.pem ubuntu@${WORKER_IP} "export KUBECONFIG=/home/ubuntu/kubeconfig && kubectl set image deployment/bookstore bookstore=${IMAGE_TAG} --record"
         '''
       }
     }
     stage('Verify Deployment') {
       steps {
         sh '''
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/bookstore_poc ubuntu@${WORKER_IP} "export KUBECONFIG=/home/ubuntu/kubeconfig && kubectl rollout status deployment/bookstore"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ci-cd-end-to-end.pem ubuntu@${WORKER_IP} "export KUBECONFIG=/home/ubuntu/kubeconfig && kubectl rollout status deployment/bookstore"
         '''
       }
     }
