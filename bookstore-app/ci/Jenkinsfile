@@ -25,7 +25,9 @@ pipeline {
         stage('Code Security') {
           steps {
             dir('bookstore-app') {
-              sh 'cd app && find src -name "*.js" -exec grep -l "password\|secret\|key" {} + || echo "No hardcoded secrets found"'
+              sh 'cd app && find src -name "*.js" -exec grep -l "password" {} + || echo "No passwords found"'
+              sh 'cd app && find src -name "*.js" -exec grep -l "secret" {} + || echo "No secrets found"'
+              sh 'cd app && find src -name "*.js" -exec grep -l "key" {} + || echo "No keys found"'
             }
           }
         }
