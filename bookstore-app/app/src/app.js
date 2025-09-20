@@ -5,48 +5,61 @@ const app = express();
 const register = new client.Registry();
 client.collectDefaultMetrics({ register });
 
-const devopsProducts = [
-  { id: 1, name: 'Jenkins Pro', category: 'CI/CD', price: 299, description: 'Enterprise CI/CD automation', image: 'https://www.jenkins.io/images/logos/jenkins/jenkins.svg' },
-  { id: 2, name: 'Docker Enterprise', category: 'Containerization', price: 199, description: 'Container platform', image: 'https://www.docker.com/wp-content/uploads/2022/03/vertical-logo-monochromatic.png' },
-  { id: 3, name: 'Kubernetes Toolkit', category: 'Orchestration', price: 399, description: 'K8s management suite', image: 'https://kubernetes.io/images/kubernetes-horizontal-color.png' },
-  { id: 4, name: 'Terraform Cloud', category: 'IaC', price: 149, description: 'Infrastructure as Code', image: 'https://www.datocms-assets.com/2885/1629941242-logo-terraform-main.svg' },
-  { id: 5, name: 'Ansible Tower', category: 'Configuration', price: 249, description: 'Automation platform', image: 'https://logos-world.net/wp-content/uploads/2021/01/Ansible-Logo.png' },
-  { id: 6, name: 'Prometheus Stack', category: 'Monitoring', price: 179, description: 'Monitoring & alerting', image: 'https://prometheus.io/assets/prometheus_logo_grey.svg' },
-  { id: 7, name: 'GitLab Ultimate', category: 'DevOps Platform', price: 499, description: 'Complete DevOps lifecycle', image: 'https://about.gitlab.com/images/press/logo/svg/gitlab-logo-500.svg' },
-  { id: 8, name: 'AWS DevOps Suite', category: 'Cloud', price: 599, description: 'AWS native DevOps tools', image: 'https://a0.awsstatic.com/libra-css/images/logos/aws_smile-header-desktop-en-white_59x35.png' }
+// Travel Packages
+const travelPackages = [
+  { id: 1, name: 'Bali Getaway', category: 'Beach', price: 899, description: '7 days in tropical paradise with spa & surfing', image: 'https://upload.wikimedia.org/wikipedia/commons/6/6e/Bali_beach.jpg' },
+  { id: 2, name: 'Swiss Alps Adventure', category: 'Adventure', price: 1499, description: 'Ski, snowboard & explore the Alps', image: 'https://upload.wikimedia.org/wikipedia/commons/0/07/Swiss_Alps.jpg' },
+  { id: 3, name: 'Dubai Desert Safari', category: 'Luxury', price: 1099, description: '5-star desert safari, dune bashing & camel rides', image: 'https://upload.wikimedia.org/wikipedia/commons/6/61/Dubai_desert.jpg' },
+  { id: 4, name: 'Paris Romantic Escape', category: 'City', price: 1299, description: '5 days in Paris with Eiffel Tower tour', image: 'https://upload.wikimedia.org/wikipedia/commons/a/a8/Tour_Eiffel_Wikimedia_Commons.jpg' },
+  { id: 5, name: 'Thailand Explorer', category: 'Beach', price: 999, description: 'Bangkok, Phuket & Phi Phi Islands adventure', image: 'https://upload.wikimedia.org/wikipedia/commons/f/f3/Phi_phi_islands.jpg' },
+  { id: 6, name: 'Kenya Safari Expedition', category: 'Wildlife', price: 1799, description: 'Safari tours & wildlife adventures in Maasai Mara', image: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Masai_Mara.jpg' },
+  { id: 7, name: 'Tokyo Tech & Culture', category: 'City', price: 1399, description: 'Shibuya, Akihabara & Mt. Fuji day trip', image: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/Tokyo_Skyline.jpg' },
+  { id: 8, name: 'Maldives Luxury Retreat', category: 'Luxury', price: 2499, description: 'Private overwater villa & snorkeling experience', image: 'https://upload.wikimedia.org/wikipedia/commons/2/2b/Maldives_Beach.jpg' }
 ];
 
 app.use(express.json());
 
-app.get('/health', (req, res) => res.json({ status: 'ok', products: devopsProducts.length }));
+// Health endpoint
+app.get('/health', (req, res) => res.json({ status: 'ok', packages: travelPackages.length }));
+
+// Prometheus metrics
 app.get('/metrics', async (req, res) => {
   res.set('Content-Type', register.contentType);
   res.end(await register.metrics());
 });
 
+// Home Page - Travel Website UI
 app.get('/', (req, res) => {
   const html = `
-    <html><head><title>DevOps Store</title><style>
-      body{font-family:Arial;margin:40px;background:#f5f5f5}
-      .header{text-align:center;color:#333;margin-bottom:30px}
-      .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
-      .product{background:white;padding:20px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)}
-      .product img{width:100px;height:60px;object-fit:contain;margin-bottom:10px}
-      .price{color:#e74c3c;font-weight:bold;font-size:18px}
-      .category{background:#3498db;color:white;padding:4px 8px;border-radius:4px;font-size:12px;display:inline-block;margin-top:10px}
+    <html><head><title>✈️ Travel Explorer</title><style>
+      body{font-family:Arial;margin:0;background:#f0f8ff;color:#333}
+      .header{background:#3498db;color:white;text-align:center;padding:40px 20px}
+      .header h1{margin:0;font-size:40px}
+      .header p{margin:10px 0 0;font-size:18px}
+      .packages{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;padding:30px}
+      .package{background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,0.1);transition:transform .2s}
+      .package:hover{transform:translateY(-5px)}
+      .package img{width:100%;height:200px;object-fit:cover}
+      .info{padding:15px}
+      .info h3{margin:0;font-size:22px}
+      .info p{font-size:14px;color:#666}
+      .price{color:#e74c3c;font-weight:bold;font-size:20px;margin-top:10px}
+      .category{background:#2ecc71;color:white;padding:5px 10px;border-radius:20px;font-size:12px;display:inline-block;margin-top:8px}
     </style></head><body>
       <div class="header">
-        <h1>🚀 DevOps Product Store</h1>
-        <p>Your one-stop shop for DevOps tools & platforms</p>
+        <h1>🌍 Travel Explorer</h1>
+        <p>Your dream destinations, curated with love ❤️</p>
       </div>
-      <div class="products">
-        ${devopsProducts.map(p => `
-          <div class="product">
-            <img src="${p.image}" alt="${p.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMTAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iNjAiIGZpbGw9IiNlY2YwZjEiLz48dGV4dCB4PSI1MCIgeT0iMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzM0OThkYiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+JHtwLm5hbWV9PC90ZXh0Pjwvc3ZnPg=='">
-            <h3>${p.name}</h3>
-            <p>${p.description}</p>
-            <div class="price">$${p.price}</div>
-            <span class="category">${p.category}</span>
+      <div class="packages">
+        ${travelPackages.map(p => `
+          <div class="package">
+            <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/300x200?text=Travel'">
+            <div class="info">
+              <h3>${p.name}</h3>
+              <p>${p.description}</p>
+              <div class="price">\$${p.price}</div>
+              <span class="category">${p.category}</span>
+            </div>
           </div>
         `).join('')}
       </div>
@@ -55,19 +68,20 @@ app.get('/', (req, res) => {
   res.send(html);
 });
 
-app.get('/api/products', (req, res) => {
+// API endpoints
+app.get('/api/packages', (req, res) => {
   const { category } = req.query;
-  const products = category ? devopsProducts.filter(p => p.category.toLowerCase().includes(category.toLowerCase())) : devopsProducts;
-  res.json({ products, total: products.length });
+  const packages = category ? travelPackages.filter(p => p.category.toLowerCase().includes(category.toLowerCase())) : travelPackages;
+  res.json({ packages, total: packages.length });
 });
 
-app.get('/api/products/:id', (req, res) => {
-  const product = devopsProducts.find(p => p.id === parseInt(req.params.id));
-  product ? res.json(product) : res.status(404).json({ error: 'Product not found' });
+app.get('/api/packages/:id', (req, res) => {
+  const travelPackage = travelPackages.find(p => p.id === parseInt(req.params.id));
+  travelPackage ? res.json(travelPackage) : res.status(404).json({ error: 'Package not found' });
 });
 
 app.get('/api/categories', (req, res) => {
-  const categories = [...new Set(devopsProducts.map(p => p.category))];
+  const categories = [...new Set(travelPackages.map(p => p.category))];
   res.json({ categories });
 });
 
