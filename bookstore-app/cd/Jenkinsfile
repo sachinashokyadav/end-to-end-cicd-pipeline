@@ -11,10 +11,11 @@ pipeline {
             steps {
                 sshagent(['ssh-key']) {
                     sh """
-                        ssh -o StrictHostKeyChecking=no ubuntu@${WORKER_IP} \\
-                        "export KUBECONFIG=/home/ubuntu/kubeconfig && \\
-                        # Apply Deployment YAML
-                        kubectl apply -f - <<EOF
+                        ssh -o StrictHostKeyChecking=no ubuntu@${WORKER_IP} << 'EOF'
+export KUBECONFIG=/home/ubuntu/kubeconfig
+
+# Apply Deployment YAML
+kubectl apply -f - <<YAML
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -48,10 +49,10 @@ spec:
             port: 3000
           initialDelaySeconds: 15
           periodSeconds: 20
-EOF
+YAML
 
-                        # Apply Service YAML
-                        kubectl apply -f - <<EOF
+# Apply Service YAML
+kubectl apply -f - <<YAML
 apiVersion: v1
 kind: Service
 metadata:
@@ -64,21 +65,14 @@ spec:
     - port: 3000
       targetPort: 3000
       nodePort: 30080
-EOF
+YAML
 
-                        # Force rollout to ensure pods use new image
-                        kubectl set image deployment/bookstore bookstore=sachinashokyadav/bookstore-app:${IMAGE_TAG}
-                        "
-                    """
-                }
-            }
-        }
-        stage('Verify Deployment') {
-            steps {
-                sshagent(['ssh-key']) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ubuntu@${WORKER_IP} \\
-                        "export KUBECONFIG=/home/ubuntu/kubeconfig && kubectl rollout status deployment/bookstore"
+# Update deployment image
+kubectl set image deployment/bookstore bookstore=sachinashokyadav/bookstore-app:${IMAGE_TAG}
+
+# Wait for rollout to finish
+kubectl rollout status deployment/bookstore
+EOF
                     """
                 }
             }
