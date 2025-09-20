@@ -40,7 +40,7 @@ pipeline {
             sh '''
               cd app
               TAG=$(git rev-parse --short HEAD)
-              sudo docker build -t $DOCKERHUB:$TAG .
+              docker build -t $DOCKERHUB:$TAG .
               echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
               docker push $DOCKERHUB:$TAG
               echo $DOCKERHUB:$TAG > ../image.info
@@ -55,7 +55,7 @@ pipeline {
           sh '''
             cd app
             TAG=$(git rev-parse --short HEAD)
-            sudo docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --exit-code 1 --severity HIGH,CRITICAL $DOCKERHUB:$TAG || true
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --exit-code 1 --severity HIGH,CRITICAL $DOCKERHUB:$TAG || true
           '''
         }
       }
