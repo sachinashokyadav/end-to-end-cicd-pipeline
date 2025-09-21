@@ -45,6 +45,24 @@
         name: jenkins
         enabled: yes
         state: started
+    - name: install nodejs
+       apt:
+        name: nodejs
+        state: present
+    - name: install npm
+      apt:
+        name: npm
+        state: present
+    - name: add jenkins user to docker group
+      user:
+        name: jenkins
+        groups: docker
+        append: yes
+    - name: restart jenkins service
+      systemd:
+        name: jenkins
+        state: restarted
+
 
 - hosts: worker
   become: yes
@@ -71,3 +89,5 @@
         dest: /home/ubuntu/kubeconfig
         owner: ubuntu
         mode: '0600'
+
+
